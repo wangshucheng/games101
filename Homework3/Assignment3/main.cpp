@@ -49,8 +49,32 @@ Eigen::Matrix4f get_model_matrix(float angle)
 
 Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio, float zNear, float zFar)
 {
-    // TODO: Use the same projection matrix from the previous assignments
+    Eigen::Matrix4f projection = Eigen::Matrix4f::Identity();
 
+    Eigen::Matrix4f persp2ortho;
+    persp2ortho << zNear, 0, 0, 0, 
+                0, zNear, 0, 0, 
+                0, 0, zNear+zFar, -zNear*zFar, 
+                0, 0, 1, 0;
+    
+    float top = tan(eye_fov / 180.0 * MY_PI / 2) * zNear;
+    float bottom = -top;
+    float right = top * aspect_ratio;
+    float left = -right;
+    Eigen::Matrix4f ortho_scale, ortho_translate;
+    ortho_scale << 2/(right - left), 0, 0, 0,
+        0, 2/(top - bottom), 0, 0,
+        0, 0, 2/(zNear - zFar), 0,
+        0, 0, 0, 1;
+
+    ortho_translate << 1, 0, 0, -(right + left)/2,
+        0, 1, 0, -(top + bottom)/2,
+        0, 0, 1, -(zFar + zNear)/2,
+        0, 0, 0, 1;
+
+    projection = ortho_scale * ortho_translate * persp2ortho;
+
+    return projection;
 }
 
 Eigen::Vector3f vertex_shader(const vertex_shader_payload& payload)
@@ -84,7 +108,7 @@ Eigen::Vector3f texture_fragment_shader(const fragment_shader_payload& payload)
     if (payload.texture)
     {
         // TODO: Get the texture value at the texture coordinates of the current fragment
-
+        https://blog.csdn.net/qq_36242312/article/details/105888669
     }
     Eigen::Vector3f texture_color;
     texture_color << return_color.x(), return_color.y(), return_color.z();
