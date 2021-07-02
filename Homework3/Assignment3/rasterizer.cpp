@@ -260,7 +260,6 @@ static Eigen::Vector2f interpolate(float alpha, float beta, float gamma, const E
 void rst::rasterizer::rasterize_triangle(const Triangle& t, const std::array<Eigen::Vector3f, 3>& view_pos) 
 {
     auto v = t.toVector4();
-    auto v = t.toVector4();
 
 	float min_x = std::min(v[0][0], std::min(v[1][0], v[2][0]));
     float max_x = std::max(v[0][0], std::max(v[1][0], v[2][0]));
@@ -283,11 +282,11 @@ void rst::rasterizer::rasterize_triangle(const Triangle& t, const std::array<Eig
 
                     fragment_shader_payload payload( interpolated_color, interpolated_normal.normalized(), interpolated_texcoords, texture ? &*texture : nullptr);
                     payload.view_pos = interpolated_shadingcoords;
-                    auto pixel_color = fragment_shader(payload);
+                    Eigen::Vector3f pixel_color = fragment_shader(payload);
                     
                     depth_buf[get_index(x, y)] = z_interpolated;
-                    frame_buf[get_index(x, y)] = interpolated_color;
-                    Eigen::Vector3f point = Eigen::Vector3f(x, y, z_interpolated);
+                    Eigen::Vector2i point = Eigen::Vector2i(x, y);
+
                     set_pixel(point, pixel_color);
                 }
             }
