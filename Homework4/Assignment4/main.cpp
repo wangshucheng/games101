@@ -33,8 +33,18 @@ void naive_bezier(const std::vector<cv::Point2f> &points, cv::Mat &window)
 cv::Point2f recursive_bezier(const std::vector<cv::Point2f> &control_points, float t) 
 {
     // TODO: Implement de Casteljau's algorithm
-    return cv::Point2f();
+    if(control_points.size() == 2)
+    {
+        return control_points[0] + t * (control_points[1] - control_points[0]);
+    }
 
+    std::vector<cv::Point2f> points;
+    for (int i = 0; i < control_points.size() - 1; i++)
+    {
+        points.push_back(control_points[i] + t * (control_points[i + 1] - control_points[i]));
+    }
+
+    return recursive_bezier(points, t);
 }
 
 void bezier(const std::vector<cv::Point2f> &control_points, cv::Mat &window) 
@@ -42,6 +52,50 @@ void bezier(const std::vector<cv::Point2f> &control_points, cv::Mat &window)
     // TODO: Iterate through all t = 0 to t = 1 with small steps, and call de Casteljau's 
     // recursive Bezier algorithm.
 
+    if (control_points.size() <= 1)
+        return;
+
+    for (double t = 0.0; t <= 1.0; t += 0.002) 
+    {
+        auto point = recursive_bezier(control_points, t);
+        window.at<cv::Vec3b>(point.y, point.x)[1] = 255;
+
+        //anti-aliasing
+        float x = point.x - std::floor(point.x);
+        float y = point.y - std::floor(point.y);
+        int x_flag = x < 0.5f ? -1 : 1;
+        int y_flag = y < 0.5f ? -1 : 1;
+
+        // 距离采样点最近的4个坐标点
+        cv::Point2f p00 = cv::Point2f(std::floor(point.x) + 0.5f, std::floor(point.y) + 0.5f);
+        cv::Point2f p01 = cv::Point2f(std::floor(point.x + x_flag * 1.0f) + 0.5f, std::floor(point.y) + 0.5f);
+        cv::Point2f p10 = cv::Point2f(std::floor(point.x) + 0.5f, std::floor(point.y + y_flag * 1.0f) + 0.5f);
+        cv::Point2f p11 = cv::Point2f(std::floor(point.x + x_flag * 1.0f) + 0.5f, std::floor(point.y + y_flag * 1.0f) + 0.5f);
+
+        std::vector<cv::Point2f> vec;
+        vec.push_back(p01);
+        vec.push_back(p10);
+        vec.push_back(p11);
+
+        // 计算最近的坐标点与采样点距离
+        cv::Point2f distance = p00 - point;
+        float len = sqrt(distance.x * distance.x + distance.y * distance.y);
+
+        // 对边缘点进行着色
+        for(auto p:vec)
+        {
+            // 根据距离比, 计算边缘点影响系数 
+            cv::Point2f d = p - point;
+            float l = sqrt(d.x * d.x + d.y * d.y);
+            float percnet = len / l;
+
+            cv::Vec3d color = window.at<cv::Vec3b>(p.y, p.x);
+            // 此处简单粗暴取最大值
+            color[1] = std::max(color[1], (double)255 * percnet);
+            window.at<cv::Vec3b>(p.y, p.x) = color;
+        }
+
+    }
 }
 
 int main() 
@@ -62,8 +116,8 @@ int main()
 
         if (control_points.size() == 4) 
         {
-            naive_bezier(control_points, window);
-            //   bezier(control_points, window);
+            // naive_bezier(control_points, window);
+            bezier(control_points, window);
 
             cv::imshow("Bezier Curve", window);
             cv::imwrite("my_bezier_curve.png", window);
