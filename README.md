@@ -15,3 +15,33 @@ games101
 
 CMakeLists.txt 去掉 -fsanitize=undefined
 
+
+
+### hw7
+
+```
+inline float get_random_float()
+{
+    std::random_device dev;
+    std::mt19937 rng(dev());
+    std::uniform_real_distribution<float> dist(0.f, 1.f); // distribution in range [1, 6]
+
+    return dist(rng);
+}
+```
+
+win10+MinGW+gcc 
+
+std::random_device dev;
+
+运行时报错，原因未知
+
+重新实现
+
+```
+inline float get_random_float()
+{
+    return rand()%10000/(float)10000;
+}
+```
+
