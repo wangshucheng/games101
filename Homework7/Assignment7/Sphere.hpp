@@ -56,7 +56,7 @@ public:
         float t0, t1;
         if (!solveQuadratic(a, b, c, t0, t1)) return result;
         if (t0 < 0) t0 = t1;
-        if (t0 < 0.5) return result;    // 鍦嗙殑鐩镐氦鍒ゅ畾绮惧害涓嶅
+        if (t0 < 0.5) return result;    // 圆的相交判定精度不够
         result.happened=true;
 
         result.coords = Vector3f(ray.origin + ray.direction * t0);
@@ -71,7 +71,7 @@ public:
     { N = normalize(P - center); }
 
     Vector3f evalDiffuseColor(const Vector2f &st)const {
-        //return m->getColor();
+        return m->getEmission();
     }
     Bounds3 getBounds(){
         return Bounds3(Vector3f(center.x-radius, center.y-radius, center.z-radius),
