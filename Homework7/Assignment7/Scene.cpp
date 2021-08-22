@@ -104,8 +104,8 @@ Vector3f Scene::castRay(const Ray &ray, int depth) const
     Ray obj2lightray = {obj_intersection.coords, ws};
     Intersection t = intersect(obj2lightray);
     // 判断光线是否被挡的边界情况。
-    // if(t.distance - obj2light.norm() > -EPSILON)
-    if(t.happened && (t.coords - light_intersection.coords).norm() < 1e-2)
+    if(t.distance - obj2light.norm() > -EPSILON)
+    // if(t.happened && (t.coords - light_intersection.coords).norm() < EPSILON)
     {
         Vector3f f_r = material->eval(wo, ws, N);
         // L_dir = emit * eval(wo, ws, N) * dot(ws, N) * dot(ws, NN) / |x-p|^2 / pdf_light
