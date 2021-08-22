@@ -28,18 +28,13 @@ inline  bool solveQuadratic(const float &a, const float &b, const float &c, floa
     return true;
 }
 
-inline float get_random_float1()
+inline float get_random_float()
 {
     std::random_device dev;
     std::mt19937 rng(dev());
     std::uniform_real_distribution<float> dist(0.f, 1.f); // distribution in range [1, 6]
 
     return dist(rng);
-}
-
-inline float get_random_float()
-{
-    return rand()%10000/(float)10000;
 }
 
 inline void UpdateProgress(float progress)
